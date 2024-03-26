@@ -3,7 +3,7 @@
       <h1>The Fox Game</h1>
       <p>Welcome to the Virtual Pet Game project aiming to recreate the experience of taking care of a virtual pet, inspired by Tamagotchi developed in Japan from the 90's.</p>
     </div>
-    <style>
+<!--     <style>
       .container {
       display: flex;
       align-items: center;
@@ -15,7 +15,7 @@
     .description {
       flex: 2;
     }
-    </style>
+    </style> -->
      <div class="image">
       <img src="./src/img/Tamagotchi.jpeg" alt="Fox Game Image">
     </div>
