@@ -1,12 +1,26 @@
-# The Fox Game 
-<div style="display: flex;">
-    <div style="flex: 1;">
-  Welcome to the Virtual Pet Game project aiming to recreate the experience of taking care of a virtual pet, inspired by Tamagotchi developed in Japan from 90's. 
-</div>
-    <div style="flex: 1;">
-        ![Fox Game Image](./src/img/Tamagotchi.jpeg)
+<div class="container">
+   <div class="description">
+      <h1>The Fox Game</h1>
+      <p>Welcome to the Virtual Pet Game project aiming to recreate the experience of taking care of a virtual pet, inspired by Tamagotchi developed in Japan from the 90's.</p>
     </div>
-</div>
+    <style>
+      .container {
+      display: flex;
+      align-items: center;
+    }
+    .image {
+      flex: 1;
+      margin-right: 20px;
+    }
+    .description {
+      flex: 2;
+    }
+    </style>
+     <div class="image">
+      <img src="./src/img/Tamagotchi.jpeg" alt="Fox Game Image">
+    </div>
+    
+  </div>
 
 ## Game Description
   The Virtual Pet Game is an interactive web-based game where users take care of a virtual pet. Here's what you can expect from the game:
