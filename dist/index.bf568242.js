@@ -587,32 +587,31 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _gameState = require("./gameState");
 var _gameStateDefault = parcelHelpers.interopDefault(_gameState);
-var _constants = require("./constants");
 var _buttons = require("./buttons");
 var _buttonsDefault = parcelHelpers.interopDefault(_buttons);
-const tick_rate = 3000;
+var _constants = require("./constants");
 async function init() {
-    console.log("Starting Game");
-    (0, _buttonsDefault.default)((0, _gameStateDefault.default).handleUserAction);
+    console.log("starting game");
+    (0, _buttonsDefault.default)((0, _gameState.handleUserAction));
     let nextTimeToTick = Date.now();
     function nextAnimationFrame() {
         const now = Date.now();
-        if (nextTimeToTick <= Date.now()) {
+        if (nextTimeToTick <= now) {
             (0, _gameStateDefault.default).tick();
-            nextTimeToTick = now * (0, _constants.tick_rate);
-            console.log(nextTimeToTick);
+            nextTimeToTick = now + (0, _constants.tick_rate);
         }
         requestAnimationFrame(nextAnimationFrame);
     }
-    requestAnimationFrame(nextAnimationFrame);
+    nextAnimationFrame();
 }
 init();
 
 },{"./gameState":"WqhHm","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./constants":"3huJa","./buttons":"lf35D"}],"WqhHm":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-var _ui = require("./ui");
+parcelHelpers.export(exports, "handleUserAction", ()=>handleUserAction);
 var _constants = require("./constants");
+var _ui = require("./ui");
 const gameState = {
     current: "INIT",
     clock: 1,
@@ -620,67 +619,94 @@ const gameState = {
     sleepTime: -1,
     hungryTime: -1,
     dieTime: -1,
+    poopTime: -1,
     timeToStartCelebrating: -1,
     timeToEndCelebrating: -1,
+    scene: 0,
     tick () {
         this.clock++;
-        console.log("Clock", this.clock);
         if (this.clock === this.wakeTime) this.wake();
-        else if (this.time === this.sleepTime) this.sleep();
+        else if (this.clock === this.sleepTime) this.sleep();
         else if (this.clock === this.hungryTime) this.getHungry();
-        else if (this.clock === this.dieTime) this.dieTime();
         else if (this.clock === this.timeToStartCelebrating) this.startCelebrating();
         else if (this.clock === this.timeToEndCelebrating) this.endCelebrating();
         else if (this.clock === this.poopTime) this.poop();
+        else if (this.clock === this.dieTime) this.die();
         return this.clock;
     },
     startGame () {
-        console.log("Hatching");
-        this.current = "Hatching";
+        this.current = "HATCHING";
         this.wakeTime = this.clock + 3;
         (0, _ui.modFox)("egg");
         (0, _ui.modScene)("day");
+        (0, _ui.writeModal)();
     },
     wake () {
-        console.log("Awaken");
-        this.current = "Idling";
+        this.current = "IDLING";
         this.wakeTime = -1;
-        // modFox('idling');
+        (0, _ui.modFox)("idling");
         this.scene = Math.random() > (0, _constants.rain_chance) ? 0 : 1;
-        (0, _ui.modScene)((0, _constants.scenes)[this.scenes]);
+        (0, _ui.modScene)((0, _constants.scenes)[this.scene]);
+        this.determineFoxState();
         this.sleepTime = this.clock + (0, _constants.day_length);
         this.hungryTime = (0, _constants.getNextHungerTime)(this.clock);
+    },
+    handleUserAction (icon) {
+        // can't do actions while in these states
+        if ([
+            "SLEEP",
+            "FEEDING",
+            "CELEBRATING",
+            "HATCHING"
+        ].includes(this.current)) // do nothing
+        return;
+        if (this.current === "INIT" || this.current === "DEAD") {
+            this.startGame();
+            return;
+        }
+        // execute the currently selected action
+        switch(icon){
+            case "weather":
+                this.changeWeather();
+                break;
+            case "poop":
+                this.cleanUpPoop();
+                break;
+            case "fish":
+                this.feed();
+                break;
+        }
+    },
+    changeWeather () {
+        this.scene = (1 + this.scene) % (0, _constants.scenes).length;
+        (0, _ui.modScene)((0, _constants.scenes)[this.scene]);
         this.determineFoxState();
     },
-    sleep () {
-        this.state = "sleep";
-        (0, _ui.modFox)("sleep");
-        (0, _ui.modFox)("night");
-        this.wakeTime = this.clock + (0, _constants.night_length);
-    },
-    getHungry () {
-        this.current = "Hungry";
-        this.dieTime = (0, _constants.getNextDieTime)(this.clock);
-        this.hungryTime = -1;
-        (0, _ui.modFox)("hungry");
+    cleanUpPoop () {
+        if (this.current === "POOPING") {
+            this.dieTime = -1;
+            (0, _ui.togglePoopBag)(true);
+            this.startCelebrating();
+            this.hungryTime = (0, _constants.getNextHungerTime)(this.clock);
+        }
     },
     poop () {
-        this.current = "Pooping", this.poopTime = -1;
+        this.current = "POOPING";
+        this.poopTime = -1;
         this.dieTime = (0, _constants.getNextDieTime)(this.clock);
         (0, _ui.modFox)("pooping");
     },
-    cleanUpPoop () {
-        this.current;
+    feed () {
+        // can only feed when hungry
+        if (this.current !== "HUNGRY") return;
+        this.current = "FEEDING";
         this.dieTime = -1;
-        (0, _ui.togglePoopBag)(true);
-        this.startCelebrating();
-        this.hungryTime = (0, _constants.getNextHungerTime)(this.clock);
-    },
-    die () {
-        console.log("Rip");
+        this.poopTime = (0, _constants.getNextPoopTime)(this.clock);
+        (0, _ui.modFox)("eating");
+        this.timeToStartCelebrating = this.clock + 2;
     },
     startCelebrating () {
-        this.current = "Celebrating";
+        this.current = "CELEBRATING";
         (0, _ui.modFox)("celebrate");
         this.timeToStartCelebrating = -1;
         this.timeToEndCelebrating = this.clock + 2;
@@ -691,61 +717,64 @@ const gameState = {
         this.determineFoxState();
         (0, _ui.togglePoopBag)(false);
     },
-    changeWeather () {
-        this.scene = this.scene + 1 % (0, _constants.scenes).length;
-        (0, _ui.modScene)((0, _constants.scenes)[this.scene]);
-        this.determineFoxState();
-    },
     determineFoxState () {
         if (this.current === "IDLING") {
             if ((0, _constants.scenes)[this.scene] === "rain") (0, _ui.modFox)("rain");
             else (0, _ui.modFox)("idling");
         }
     },
-    handleUserAction (icon) {
-        if ([
-            "Sleep",
-            "Feeding",
-            "Celebrating",
-            "Hatching"
-        ].includes(this.current)) // do nothing
-        return;
-        if (this.current === "INIT" || this.current === "Dead") {
-            this.startGame();
-            return;
-        }
+    clearTimes () {
+        this.wakeTime = -1;
+        this.sleepTime = -1;
+        this.hungryTime = -1;
+        this.dieTime = -1;
+        this.poopTime = -1;
+        this.timeToStartCelebrating = -1;
+        this.timeToEndCelebrating = -1;
+    },
+    sleep () {
+        this.current = "SLEEP";
+        (0, _ui.modFox)("sleep");
+        (0, _ui.modScene)("night");
+        this.clearTimes();
+        this.wakeTime = this.clock + (0, _constants.night_length);
+    },
+    getHungry () {
+        this.current = "HUNGRY";
+        this.dieTime = (0, _constants.getNextDieTime)(this.clock);
+        this.hungryTime = -1;
+        (0, _ui.modFox)("hungry");
+    },
+    die () {
+        this.current = "DEAD";
+        (0, _ui.modScene)("dead");
+        (0, _ui.modFox)("dead");
+        this.clearTimes();
+        (0, _ui.writeModal)("The fox died :( <br/> Press the middle button to start");
     }
 };
+const handleUserAction = gameState.handleUserAction.bind(gameState);
 exports.default = gameState;
 
-},{"./ui":"h5UjH","./constants":"3huJa","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3huJa":[function(require,module,exports) {
+},{"./ui":"h5UjH","./constants":"3huJa","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"h5UjH":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "tick_rate", ()=>tick_rate);
-parcelHelpers.export(exports, "ICONS", ()=>ICONS);
-parcelHelpers.export(exports, "rain_chance", ()=>rain_chance);
-parcelHelpers.export(exports, "scenes", ()=>scenes);
-parcelHelpers.export(exports, "day_length", ()=>day_length);
-parcelHelpers.export(exports, "night_length", ()=>night_length);
-parcelHelpers.export(exports, "getNextHungerTime", ()=>getNextHungerTime);
-parcelHelpers.export(exports, "getNextDieTime", ()=>getNextDieTime);
-parcelHelpers.export(exports, "getNextPoopTime", ()=>getNextPoopTime);
-const tick_rate = 3000;
-const ICONS = [
-    "fish",
-    "poop",
-    "weather"
-];
-const rain_chance = 0.2;
-const scenes = [
-    "day",
-    "rain"
-];
-const day_length = 10;
-const night_length = 4;
-const getNextHungerTime = (clock)=>Math.floor(Math.random() * 3) + 5 + clock;
-const getNextDieTime = (clock)=>Math.floor(Math.random() * 2) + 3 + clock;
-const getNextPoopTime = (clock)=>Math.floor(Math.random() * 2) + 4 + clock;
+parcelHelpers.export(exports, "modFox", ()=>modFox);
+parcelHelpers.export(exports, "modScene", ()=>modScene);
+parcelHelpers.export(exports, "togglePoopBag", ()=>togglePoopBag);
+parcelHelpers.export(exports, "writeModal", ()=>writeModal);
+const modFox = function modFox(state) {
+    document.querySelector(".fox").className = `fox fox-${state}`;
+};
+const modScene = function modScene(state) {
+    document.querySelector(".game").className = `game ${state}`;
+};
+const togglePoopBag = function togglePoopBag(show) {
+    document.querySelector(".poop-bag").classList.toggle("hidden", !show);
+};
+const writeModal = function writeModal(text = "") {
+    document.querySelector(".modal").innerHTML = `<div class="modal-inner">${text} </div>`;
+};
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
@@ -777,15 +806,41 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"lf35D":[function(require,module,exports) {
+},{}],"3huJa":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "ICONS", ()=>ICONS);
+parcelHelpers.export(exports, "scenes", ()=>scenes);
+parcelHelpers.export(exports, "tick_rate", ()=>tick_rate);
+parcelHelpers.export(exports, "rain_chance", ()=>rain_chance);
+parcelHelpers.export(exports, "day_length", ()=>day_length);
+parcelHelpers.export(exports, "night_length", ()=>night_length);
+parcelHelpers.export(exports, "getNextHungerTime", ()=>getNextHungerTime);
+parcelHelpers.export(exports, "getNextDieTime", ()=>getNextDieTime);
+parcelHelpers.export(exports, "getNextPoopTime", ()=>getNextPoopTime);
+const ICONS = [
+    "fish",
+    "poop",
+    "weather"
+];
+const scenes = [
+    "day",
+    "rain"
+];
+const tick_rate = 3000;
+const rain_chance = 0.2;
+const day_length = 30;
+const night_length = 5;
+const getNextHungerTime = (clock)=>Math.floor(Math.random() * 3) + 8 + clock;
+const getNextDieTime = (clock)=>Math.floor(Math.random() * 3) + 3 + clock;
+const getNextPoopTime = (clock)=>Math.floor(Math.random() * 3) + 8 + clock;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lf35D":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "default", ()=>initButtons);
 var _constants = require("./constants");
-// params icon & show are not defined here!
-const toggleHighlighted = (icon, show)=>{
-    document.querySelector(`${(0, _constants.ICONS)[icon]}-icon`).classList.toggle("highlighted", show);
-};
+const toggleHighlighted = (icon, show)=>document.querySelector(`${(0, _constants.ICONS)[icon]}-icon`).classList.toggle("highlighted", show);
 function initButtons(handleUserAction) {
     let selectedIcon = 0;
     function buttonClick({ target }) {
@@ -795,7 +850,7 @@ function initButtons(handleUserAction) {
             toggleHighlighted(selectedIcon, true);
         } else if (target.classList.contains("right-btn")) {
             toggleHighlighted(selectedIcon, false);
-            selectedIcon = (2 + selectedIcon) % (0, _constants.ICONS).length;
+            selectedIcon = (1 + selectedIcon) % (0, _constants.ICONS).length;
             toggleHighlighted(selectedIcon, true);
         } else handleUserAction((0, _constants.ICONS)[selectedIcon]);
     }

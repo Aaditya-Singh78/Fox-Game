@@ -1,5 +1,5 @@
 .btn {
-    background-image: url(bg/BUTTONS/NotSelected.png);
+    background-image: url(./bg/buttons/NotSelected.png);
     background-position: 0px;
     width: 62px;
     height: 65px;
@@ -20,15 +20,15 @@
   
   .btn:hover,
   .btn:focus {
-    background-image: url(bg/BUTTONS/Hover.png);
+    background-image: url(./bg/buttons/Hover.png);
   }
   
   .btn:active {
-    background-image: url(bg/BUTTONS/Selected.png);
+    background-image: url(./bg/buttons/Selected.png);
   }
   
   .icon {
-    background-image: url(bg/ICONS/NotSelected.png);
+    background-image: url(./bg/icons/NotSelected.png);
     background-position: 0px;
     width: 56px;
     height: 65px;
@@ -47,11 +47,11 @@
   }
   
   .icon.highlighted {
-    background-image: url(bg/ICONS/Hover.png);
+    background-image: url(./bg/icons/Hover.png);
   }
   
   .icon.active {
-    background-image: url(bg/ICONS/Selected.png);
+    background-image: url(./bg/icons/Selected.png);
   }
   
   .fox-static {

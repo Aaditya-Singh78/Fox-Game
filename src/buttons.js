@@ -1,24 +1,25 @@
-import {ICONS} from "./constants";
+import { ICONS } from "./constants";
 
-// params icon & show are not defined here!
-const toggleHighlighted = (icon,show) => {
-  document.querySelector(`${ICONS[icon]}-icon`).classList.toggle("highlighted", show);
-} 
+const toggleHighlighted = (icon, show) =>
+  document
+    .querySelector(`${ICONS[icon]}-icon`)
+    .classList.toggle("highlighted", show);
 
-export default function initButtons(handleUserAction){
+export default function initButtons(handleUserAction) {
   let selectedIcon = 0;
-  function buttonClick ({target}){
-    if(target.classList.contains("left-btn")){
-      toggleHighlighted(selectedIcon,false);
+  function buttonClick({ target }) {
+    if (target.classList.contains("left-btn")) {
+      toggleHighlighted(selectedIcon, false);
       selectedIcon = (2 + selectedIcon) % ICONS.length;
-      toggleHighlighted(selectedIcon,true);
-    } else if(target.classList.contains("right-btn")){
-      toggleHighlighted(selectedIcon,false);
-      selectedIcon = (2 + selectedIcon) % ICONS.length;
-      toggleHighlighted(selectedIcon,true);
-    }else{
+      toggleHighlighted(selectedIcon, true);
+    } else if (target.classList.contains("right-btn")) {
+      toggleHighlighted(selectedIcon, false);
+      selectedIcon = (1 + selectedIcon) % ICONS.length;
+      toggleHighlighted(selectedIcon, true);
+    } else {
       handleUserAction(ICONS[selectedIcon]);
     }
   }
-  document.querySelector('.buttons').addEventListener("click", buttonClick);
+
+  document.querySelector(".buttons").addEventListener("click", buttonClick);
 }

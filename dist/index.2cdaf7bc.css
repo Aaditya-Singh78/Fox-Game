@@ -12,7 +12,7 @@ body {
   justify-content: center;
   align-items: center;
   display: flex;
-  position: absolute;
+  position: relative;
   inset: 0;
 }
 
@@ -72,9 +72,13 @@ body {
   left: 160px;
 }
 
-.modal {
+.modal-inner {
   color: #fff;
   background-color: #8a2be2;
+  border-radius: 12px;
+  padding: 25px;
+  font-size: 20px;
+  font-weight: bold;
   position: absolute;
   top: 0;
   left: 0;
@@ -102,7 +106,7 @@ body {
   left: 290px;
 }
 
-.fox-rain, .fox-eating {
+.fox-rain, .fox-hungry, .fox-eating {
   top: 362px;
 }
 

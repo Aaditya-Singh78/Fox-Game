@@ -1,7 +1,7 @@
 .btn {
   cursor: pointer;
   background-color: #0000;
-  background-image: url("NotSelected.87c09a1b.png");
+  background-image: url("NotSelected.636f8ffa.png");
   background-position: 0;
   background-repeat: no-repeat;
   border-color: #0000;
@@ -19,16 +19,16 @@
 }
 
 .btn:hover, .btn:focus {
-  background-image: url("Hover.308cebf0.png");
+  background-image: url("Hover.19eda338.png");
 }
 
 .btn:active {
-  background-image: url("Selected.7a33d38b.png");
+  background-image: url("Selected.bb05f437.png");
 }
 
 .icon {
   background-color: #0000;
-  background-image: url("NotSelected.2b252911.png");
+  background-image: url("NotSelected.01ff5788.png");
   background-position: 0;
   background-repeat: no-repeat;
   border-color: #0000;
@@ -46,11 +46,11 @@
 }
 
 .icon.highlighted {
-  background-image: url("Hover.1ffd7713.png");
+  background-image: url("Hover.04417f4e.png");
 }
 
 .icon.active {
-  background-image: url("Selected.7d540128.png");
+  background-image: url("Selected.3cfc9732.png");
 }
 
 .fox-static {
